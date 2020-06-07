@@ -1,0 +1,57 @@
+---
+- name: Install LAMP and Wordpress
+  become: yes
+  become_method: sudo
+  user: centos
+  hosts: all
+  tasks: 
+  - name: Ensure epel repo present
+    yum:
+      name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+      state: present
+  - name: Add Remi Repository
+    yum_repository:
+      name: remi-php71
+      description: Remi's PHP 7.3 RPM repository for Enterprise Linux $releasever - $basearch
+      mirrorlist: http://rpms.remirepo.net/enterprise/$releasever/php73/mirror
+      enabled: yes
+      gpgcheck: 1
+      gpgkey: http://rpms.remirepo.net/RPM-GPG-KEY-remi
+  - name: Utilis install    
+    yum:
+      name: yum-utils
+      state: present
+  - name: Install packages
+    package:
+      name: "{{item}}"
+      state: present
+    with_items:
+    - wget
+    - httpd
+    - php
+    - php-mysql
+    - mariadb
+    - mariadb-server
+  - name: Unarchive a file that needs to be downloaded (added in 2.0)
+    unarchive:
+      src: https://wordpress.org/latest.tar.gz
+      dest: /var/www/html
+      remote_src: yes
+  - name: moving files
+    shell: mv /var/www/html/wordpress/* /var/www/html
+  - name: Change file ownership, group and permissions
+    file:
+      path: /var/www/html
+      owner: apache
+      group: apache
+  - name: Disable SELinux
+    selinux:
+      state: disabled
+  - name: Put SELinux in permissive mode, logging actions that would be blocked.
+    selinux:
+      policy: targeted
+      state: permissive
+  - name: Restart Apache
+    service:
+      name: httpd
+      state: restarted
