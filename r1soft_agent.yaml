@@ -1,0 +1,25 @@
+ name: Install R1soft agent
+  become: yes
+  become_method: sudo
+  user: centos
+  hosts: all
+  tasks: 
+  - name: creates a repo
+    copy:
+      scr: r1soft.repo
+      dest: /etc/yum.repos.d/r1soft.repo
+  - name: Installs agent
+    package:
+    name: serverbackup-enterprise-agent
+    state: present
+  - name: Start agent
+    service: cdp-agent
+    state: restarted
+    enabled: yes
+  - name: Stop iptables
+    service:
+      name: iptables
+      state: stopped
+      enable: no
+  - name: Get key
+    command: R1soft-setup –get-key  http://52.56.156.240:8080/
