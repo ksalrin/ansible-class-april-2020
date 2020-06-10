@@ -5,21 +5,26 @@
   hosts: all
   tasks: 
   - name: creates a repo
+    when: (ansible_facts['distribution'] == "CentOS" and ansible_facts['distribution_major_version'] == "6")
     copy:
       scr: r1soft.repo
       dest: /etc/yum.repos.d/r1soft.repo
   - name: Installs agent
+    when: (ansible_facts['distribution'] == "CentOS" and ansible_facts['distribution_major_version'] == "6")
     package:
     name: serverbackup-enterprise-agent
     state: present
   - name: Start agent
+    when: (ansible_facts['distribution'] == "CentOS" and ansible_facts['distribution_major_version'] == "6")
     service: cdp-agent
     state: restarted
     enabled: yes
   - name: Stop iptables
+    when: (ansible_facts['distribution'] == "CentOS" and ansible_facts['distribution_major_version'] == "6")
     service:
       name: iptables
       state: stopped
       enable: no
   - name: Get key
+    when: (ansible_facts['distribution'] == "CentOS" and ansible_facts['distribution_major_version'] == "6")
     command: R1soft-setup –get-key  http://52.56.156.240:8080/
